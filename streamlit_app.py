@@ -15,7 +15,7 @@ st.title("📊 성적 시각화 앱")
 st.write("CSV로 성적 데이터를 업로드하면 기초 통계와 여러 차트를 자동으로 생성합니다.")
 
 # CSV 파일 업로드
-st.header("1️⃣ CSV 파일 업로드")
+st.header("1️⃣ CSV 파일")
 uploaded_csv = st.file_uploader("성적 CSV 파일 선택", type=["csv"], accept_multiple_files=False)
 
 if uploaded_csv is not None:
@@ -134,8 +134,12 @@ if uploaded_csv is not None:
         with col1:
             scatter_x = st.selectbox("X축 변수 선택", select_cols, key="scatter_x")
         with col2:
-            scatter_y = st.selectbox("Y축 변수 선택", select_cols, 
-                                    index=min(1, len(select_cols)-1), key="scatter_y")
+            # Y축에서 X축과 다른 변수만 선택 가능하도록 필터링
+            other_cols = [c for c in select_cols if c != scatter_x]
+            if not other_cols:
+                st.warning("⚠️ X축과 다른 변수가 필요합니다. 최소 2개 이상의 변수를 선택해주세요.")
+                st.stop()
+            scatter_y = st.selectbox("Y축 변수 선택", other_cols, key="scatter_y")
         
         if scatter_x and scatter_y:
             scatter_data = proc_df[[scatter_x, scatter_y]].dropna()
